@@ -9,8 +9,8 @@ PKGS =
 TARGET = complex
 VERSION = unknown
 PROJTYPE = exe
-EXTRADEPS =  libadder/src/add.c libadder/include/adder/add.h
-EXTRAPUBLICDEPS =  libadder/include/adder/add.h
+EXTRADEPS = libadder/src/add.c libadder/include/adder/add.h
+EXTRAPUBLICDEPS = libadder/include/adder/add.h
 CONFIG ?= release
 BUILDDIR ?= build
 BUILD ?= $(BUILDDIR)/$(CONFIG)
@@ -26,7 +26,7 @@ CCOPTS_release = -O2 -flto
 CCOPTS_debug = -g
 CCOPTS_sanitize = -fsanitize=address -fsanitize=undefined $(CCOPTS_debug)
 
-LDOPTS =  -Llibadder/build/$(CONFIG)
+LDOPTS = -Llibadder/build/$(CONFIG)
 LDOPTS_release = -flto
 LDOPTS_debug =
 LDOPTS_sanitize = -fsanitize=address -fsanitize=undefined $(LDOPTS_debug)
@@ -49,7 +49,7 @@ CXXFLAGS += $(shell $(PKG_CONFIG) --cflags $(PKGS))
 LDFLAGS += $(shell $(PKG_CONFIG) --libs $(PKGS))
 endif
 
-$(BUILD)/$(TARGET):  libadder/build/$(CONFIG)/.built $(OBJS) $(EXTRADEPS)
+$(BUILD)/$(TARGET): libadder/build/$(CONFIG)/.built $(OBJS) $(EXTRADEPS)
 	@mkdir -p $(@D)
 	$(CC) -o $@ $(OBJS) $(LDFLAGS)
 	touch $(BUILD)/.built
@@ -85,10 +85,12 @@ uninstall:
 .PHONY: clean
 clean:
 	rm -rf $(BUILD)
+	$(MAKE) -C libadder clean
 
 .PHONY: distclean
 distclean:
 	rm -rf $(BUILDDIR)
+	$(MAKE) -C libadder distclean
 
 .PHONY: dumpdeps
 dumpdeps:
