@@ -5,7 +5,7 @@ HDRS = include/add.h
 
 # Defaults
 PKGS =
-TARGET = example
+TARGET = simple
 VERSION = unknown
 PROJTYPE = exe
 EXTRADEPS =
@@ -79,4 +79,6 @@ uninstall:
 clean:
 	rm -rf $(BUILD)
 
+ifneq ($(MAKECMDGOALS),clean)
 -include $(DEPS)
+endif
