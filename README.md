@@ -1,6 +1,6 @@
-# Smake
+# smake
 
-Smake is a simple Makefile generator which requires zero to no configuration.
+`smake` is a simple Makefile generator which requires little to no configuration.
 
 <!-- toc -->
 
