@@ -13,3 +13,7 @@ install: smake
 .PHONY: uninstall
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/smake
+
+.PHONY: readme-toc
+readme-toc:
+	markdown-toc -i README.md
