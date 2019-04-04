@@ -12,6 +12,7 @@ EXTRADEPS =
 CONFIG ?= release
 BUILD ?= build/$(CONFIG)
 WARNINGS = -Wall -Wextra -Wno-unused-parameter
+SMAKEFILE ?= Smakefile
 
 CCOPTS = -Iinclude -fPIC
 CCOPTS_release = -O2 -flto
@@ -23,7 +24,7 @@ LDOPTS_release = -flto
 LDOPTS_debug =
 LDOPTS_sanitize = -fsanitize=address -fsanitize=undefined $(LDOPTS_debug)
 
--include Smakefile
+-include $(SMAKEFILE)
 
 CFLAGS += $(CCOPTS_$(CONFIG)) $(CCOPTS) $(WARNINGS)
 CXXFLAGS += $(CCOPTS_$(CONFIG)) $(CCOPTS) $(WARNINGS)
