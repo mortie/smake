@@ -50,7 +50,8 @@ else
 	exit 1
 fi
 
-# A somewhat ugly way to get a variable from the Smakefile
+# A somewhat ugly way to get a variable from the Smakefile,
+# but at least we're using make's parser
 getvar() {
 	output="$(echo "\
 .PHONY: _skip
@@ -265,7 +266,9 @@ $(mk_installation)
 clean:
 	rm -rf \$(BUILD)
 
--include \$(DEPS)" > "$opt_output"
+ifneq (\$(MAKECMDGOALS),clean)
+-include \$(DEPS)
+endif" > "$opt_output"
 
 if [ "$opt_generate_only" = 0 ]; then
 	echo "$make -j $opt_jobs $*"
