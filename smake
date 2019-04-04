@@ -68,7 +68,7 @@ dumpvar:
 }
 
 # Get some variables from the Smakefile
-target="$(getvar TARGET main)"
+target="$(getvar TARGET "$(basename "$(readlink -f .)")")"
 projtype="$(getvar PROJTYPE exe)"
 if ! echo " exe solib alib lib " | grep " $projtype " >/dev/null; then
 	echo "Invalid projtype: $projtype. Expected exe, lib, alib or solib."
@@ -76,9 +76,15 @@ if ! echo " exe solib alib lib " | grep " $projtype " >/dev/null; then
 fi
 
 # Find all the source code
-sources="$(find src -name '*.c' -or -name '*.cc')"
+if [ -d src ]; then
+	sources="$(find src -name '*.c' -or -name '*.cc')"
+	headers="$(find src -name '*.h')"
+fi
+if [ -d include ]; then
+	headers="$headers$(find include -name '*.h')"
+fi
 srcs="$(printf "%s" "$sources" | tr '\n' ' ')"
-hdrs="$(find src include -name '*.h')"
+hdrs="$(printf "%s" "$headers" | tr '\n' ' ')"
 
 mk_target_exe() {
 echo "\
@@ -248,10 +254,10 @@ $(mk_target)
 
 \$(BUILD)/dep/%.c.d: src/%.c \$(HDRS)
 	@mkdir -p \$(@D)
-	\$(CC) -o \$@ -MM \$< -MT \$(patsubst src/%,obj/%.o,\$<) \$(CFLAGS)
+	\$(CC) -o \$@ -MM \$< -MT \$(patsubst src/%,\$(BUILD)/obj/%.o,\$<) \$(CFLAGS)
 \$(BUILD)/dep/%.cc.d: src/%.cc \$(HDRS)
 	@mkdir -p \$(@D)
-	\$(CXX) -o \$@ -MM \$< -MT \$(patsubst src/%,obj/%.o,\$<) \$(CXXFLAGS)
+	\$(CXX) -o \$@ -MM \$< -MT \$(patsubst src/%,\$(BUILD)/obj/%.o,\$<) \$(CXXFLAGS)
 
 $(mk_installation)
 

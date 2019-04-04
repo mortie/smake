@@ -5,7 +5,7 @@ HDRS = include/add.h
 
 # Defaults
 PKGS =
-TARGET = smake-example
+TARGET = example
 VERSION = unknown
 PROJTYPE = exe
 EXTRADEPS =
@@ -60,10 +60,10 @@ $(BUILD)/obj/%.cc.o: src/%.cc
 
 $(BUILD)/dep/%.c.d: src/%.c $(HDRS)
 	@mkdir -p $(@D)
-	$(CC) -o $@ -MM $< -MT $(patsubst src/%,obj/%.o,$<) $(CFLAGS)
+	$(CC) -o $@ -MM $< -MT $(patsubst src/%,$(BUILD)/obj/%.o,$<) $(CFLAGS)
 $(BUILD)/dep/%.cc.d: src/%.cc $(HDRS)
 	@mkdir -p $(@D)
-	$(CXX) -o $@ -MM $< -MT $(patsubst src/%,obj/%.o,$<) $(CXXFLAGS)
+	$(CXX) -o $@ -MM $< -MT $(patsubst src/%,$(BUILD)/obj/%.o,$<) $(CXXFLAGS)
 
 .PHONY: install
 install: $(BUILD)/$(TARGET)
