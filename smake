@@ -54,11 +54,11 @@ fi
 getvar() {
 	output="$(echo "\
 .PHONY: _skip
-_skip: _dump
+_skip: dumpvar
 -include $opt_file
-.PHONY: _dump
-_dump:
-	@echo \$($1)" | $make -f -)"
+.PHONY: dumpvar
+dumpvar:
+	@echo \$($1)" | $make -f - dumpvar)"
 
 	if [ -n "$output" ]; then
 		echo "$output"
@@ -263,5 +263,5 @@ clean:
 
 if [ "$opt_generate_only" = 0 ]; then
 	echo "$make -j $opt_jobs $*"
-	$make -j "$opt_jobs" SMAKEFILE="$SMAKEFILE" "$@"
+	$make -j "$opt_jobs" SMAKEFILE="$opt_file" -f "$opt_output" "$@"
 fi
