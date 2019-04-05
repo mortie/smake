@@ -255,8 +255,8 @@ echo "\
 
 SRCS = $mk_srcs
 HDRS = $mk_hdrs
-OBJS += \$(patsubst src/%,\$(BUILD)/obj/%.o,\$(SRCS))
-DEPS += \$(patsubst src/%,\$(BUILD)/dep/%.d,\$(SRCS))
+OBJS = \$(patsubst src/%,\$(BUILD)/obj/%.o,\$(SRCS))
+DEPS = \$(patsubst src/%,\$(BUILD)/dep/%.d,\$(SRCS))
 PUBLICHDRS = $mk_publichdrs
 
 # Defaults
