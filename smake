@@ -164,6 +164,9 @@ if [ "$projtype" = exe ]; then
 	@mkdir -p \$(@D)
 	\$(call runpfx,'(LD)',\$(CC) -o \$@ \$(OBJS) \$(LDFLAGS))
 	touch \$(BUILD)/.built
+	@echo Created \$@.
+\$(TARGET): \$(BUILD)/\$(TARGET)
+	cp \$< \$@
 	@echo Created \$@."
 fi
 
@@ -327,7 +330,7 @@ $(trim "$mk_installation")
 
 .PHONY: clean
 clean:
-	rm -rf \$(BUILD)$mk_smakedep_cleans
+	rm -rf \$(TARGET) \$(BUILD)$mk_smakedep_cleans
 
 .PHONY: distclean
 distclean:

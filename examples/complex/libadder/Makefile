@@ -94,7 +94,7 @@ uninstall:
 
 .PHONY: clean
 clean:
-	rm -rf $(BUILD)
+	rm -rf $(TARGET) $(BUILD)
 
 .PHONY: distclean
 distclean:

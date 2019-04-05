@@ -2,8 +2,8 @@
 
 SRCS = src/add.c src/main.c
 HDRS = src/add.h
-OBJS += $(patsubst src/%,$(BUILD)/obj/%.o,$(SRCS))
-DEPS += $(patsubst src/%,$(BUILD)/dep/%.d,$(SRCS))
+OBJS = $(patsubst src/%,$(BUILD)/obj/%.o,$(SRCS))
+DEPS = $(patsubst src/%,$(BUILD)/dep/%.d,$(SRCS))
 PUBLICHDRS = 
 
 # Defaults
@@ -57,6 +57,9 @@ $(BUILD)/$(TARGET):  $(OBJS)
 	$(call runpfx,'(LD)',$(CC) -o $@ $(OBJS) $(LDFLAGS))
 	touch $(BUILD)/.built
 	@echo Created $@.
+$(TARGET): $(BUILD)/$(TARGET)
+	cp $< $@
+	@echo Created $@.
 
 
 
@@ -86,7 +89,7 @@ uninstall:
 
 .PHONY: clean
 clean:
-	rm -rf $(BUILD)
+	rm -rf $(TARGET) $(BUILD)
 
 .PHONY: distclean
 distclean:

@@ -57,6 +57,9 @@ $(BUILD)/$(TARGET): libadder/build/$(CONFIG)/.built $(OBJS)
 	$(call runpfx,'(LD)',$(CC) -o $@ $(OBJS) $(LDFLAGS))
 	touch $(BUILD)/.built
 	@echo Created $@.
+$(TARGET): $(BUILD)/$(TARGET)
+	cp $< $@
+	@echo Created $@.
 
 libadder/build/$(CONFIG)/.built: libadder/src/add.c libadder/include/adder/add.h
 	$(call runpfx,'(SUB)',$(MAKE) -C libadder)
@@ -87,7 +90,7 @@ uninstall:
 
 .PHONY: clean
 clean:
-	rm -rf $(BUILD)
+	rm -rf $(TARGET) $(BUILD)
 	$(MAKE) -C libadder clean
 
 .PHONY: distclean
