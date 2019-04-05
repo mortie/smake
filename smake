@@ -113,6 +113,8 @@ mk_publichdrs="$(printf "%s" "$publicheaders" | tr '\n' ' ')"
 mk_smakedep_targets=""
 mk_smakedep_goals=""
 mk_smakedep_targets=""
+mk_smakedep_installs=""
+mk_smakedep_uninstalls=""
 mk_smakedep_cleans=""
 mk_smakedep_distcleans=""
 mk_extradeps=""
@@ -143,6 +145,12 @@ for dep in $smakedeps; do
 	mk_smakedep_targets="$mk_smakedep_targets
 $dep/build/\$(CONFIG)/.built: $depdeps
 	\$(call runpfx,'(SUB)',\$(MAKE) -C $dep)"
+
+	mk_smakedep_installs="$mk_smakedep_installs
+	\$(MAKE) -C $dep install"
+
+	mk_smakedep_uninstalls="$mk_smakedep_uninstalls
+	\$(MAKE) -C $dep uninstall"
 
 	mk_smakedep_cleans="$mk_smakedep_cleans
 	\$(MAKE) -C $dep clean"
@@ -199,11 +207,11 @@ if [ "$projtype" = exe ]; then
 install: \$(BUILD)/\$(TARGET)
 	mkdir -p \$(DESTDIR)\$(PREFIX)/bin
 	cp -f \$^ \$(DESTDIR)\$(PREFIX)/bin
-	chmod 755 \$(DESTDIR)\$(PREFIX)/bin/\$(TARGET)
+	chmod 755 \$(DESTDIR)\$(PREFIX)/bin/\$(TARGET)$mk_smakedep_installs
 
 .PHONY: uninstall
 uninstall:
-	rm -f \$(DESTDIR)\$(PREFIX)/bin/\$(TARGET)"
+	rm -f \$(DESTDIR)\$(PREFIX)/bin/\$(TARGET)$mk_smakedep_uninstalls"
 
 # install/uninstall for solib
 elif [ "$projtype" = solib ]; then
@@ -214,12 +222,12 @@ install: \$(BUILD)/\$(TARGET).so
 	cp -f \$^ \$(DESTDIR)\$(PREFIX)/lib
 	chmod 755 \$(DESTDIR)\$(PREFIX)/lib/\$(TARGET).so
 	mkdir -p \$(DESTDIR)\$(PREFIX)/include
-	cp -rf include/* \$(DESTDIR)\$(PREFIX)/include
+	cp -rf include/* \$(DESTDIR)\$(PREFIX)/include$mk_smakedep_installs
 
 .PHONY: uninstall
 uninstall:
 	rm -f \$(DESTDIR)\$(PREFIX)/lib/\$(TARGET).so
-	rm -rf \$(patsubst include/%,\$(DESTDIR)\$(PREFIX)/include/%,\$(wildcard include/*))"
+	rm -rf \$(patsubst include/%,\$(DESTDIR)\$(PREFIX)/include/%,\$(wildcard include/*))$mk_smakedep_uninstalls"
 
 # install/uninstall for alib
 elif [ "$projtype" = alib ]; then
@@ -229,12 +237,12 @@ install: \$(BUILD)/\$(TARGET).a
 	mkdir -p \$(DESTDIR)\$(PREFIX)/lib
 	cp -f \$^ \$(DESTDIR)\$(PREFIX)/lib
 	mkdir -p \$(DESTDIR)\$(PREFIX)/include
-	cp -rf include/* \$(DESTDIR)\$(PREFIX)/include
+	cp -rf include/* \$(DESTDIR)\$(PREFIX)/include$mk_smakedep_installs
 
 .PHONY: uninstall
 uninstall:
 	rm -f \$(DESTDIR)\$(PREFIX)/lib/\$(TARGET).a
-	rm -rf \$(patsubst include/%,\$(DESTDIR)\$(PREFIX)/include/%,\$(wildcard include/*))"
+	rm -rf \$(patsubst include/%,\$(DESTDIR)\$(PREFIX)/include/%,\$(wildcard include/*))$mk_smakedep_uninstalls"
 
 # install/uninstall for lib
 elif [ "$projtype" = lib ]; then
@@ -244,13 +252,13 @@ install: \$(BUILD)/\$(TARGET).so \$(BUILD)\$(TARGET).a
 	mkdir -p \$(DESTDIR)\$(PREFIX)/lib
 	cp -f \$^ \$(DESTDIR)\$(PREFIX)/lib
 	mkdir -p \$(DESTDIR)\$(PREFIX)/include
-	cp -rf include/* \$(DESTDIR)\$(PREFIX)/include
+	cp -rf include/* \$(DESTDIR)\$(PREFIX)/include$mk_smakedep_installs
 
 .PHONY: uninstall
 uninstall:
 	rm -f \$(DESTDIR)\$(PREFIX)/lib/\$(TARGET).so
 	rm -f \$(DESTDIR)\$(PREFIX)/lib/\$(TARGET).a
-	rm -rf \$(patsubst include/%,\$(DESTDIR)\$(PREFIX)/include/%,\$(wildcard include/*))"
+	rm -rf \$(patsubst include/%,\$(DESTDIR)\$(PREFIX)/include/%,\$(wildcard include/*))$mk_smakedep_uninstalls"
 fi
 
 echo "\

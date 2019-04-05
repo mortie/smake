@@ -83,10 +83,12 @@ install: $(BUILD)/$(TARGET)
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp -f $^ $(DESTDIR)$(PREFIX)/bin
 	chmod 755 $(DESTDIR)$(PREFIX)/bin/$(TARGET)
+	$(MAKE) -C libadder install
 
 .PHONY: uninstall
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/$(TARGET)
+	$(MAKE) -C libadder uninstall
 
 .PHONY: clean
 clean:
