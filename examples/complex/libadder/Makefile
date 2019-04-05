@@ -2,6 +2,8 @@
 
 SRCS = src/add.c
 HDRS = include/adder/add.h
+OBJS += $(patsubst src/%,$(BUILD)/obj/%.o,$(SRCS))
+DEPS += $(patsubst src/%,$(BUILD)/dep/%.d,$(SRCS))
 PUBLICHDRS = include/adder/add.h
 
 # Defaults
@@ -16,6 +18,8 @@ BUILDDIR ?= build
 BUILD ?= $(BUILDDIR)/$(CONFIG)
 WARNINGS = -Wall -Wextra -Wno-unused-parameter
 SMAKEFILE ?= Smakefile
+DESTDIR ?=
+PREFIX ?= /usr/local
 PHONIES = dumpdeps dumppublicdeps dumpprojtype clean distclean
 
 PKG_CONFIG ?= pkg-config
@@ -31,17 +35,14 @@ LDOPTS_release = -flto
 LDOPTS_debug =
 LDOPTS_sanitize = -fsanitize=address -fsanitize=undefined $(LDOPTS_debug)
 
+.PHONY: all
+all: $(BUILD)/$(TARGET).so $(BUILD)/$(TARGET).a
+
 -include $(SMAKEFILE)
 
 CFLAGS += $(CCOPTS_$(CONFIG)) $(CCOPTS) $(WARNINGS)
 CXXFLAGS += $(CCOPTS_$(CONFIG)) $(CCOPTS) $(WARNINGS)
 LDFLAGS += $(LDOPTS_$(CONFIG)) $(LDOPTS)
-
-OBJS = $(patsubst src/%,$(BUILD)/obj/%.o,$(SRCS))
-DEPS = $(patsubst src/%,$(BUILD)/dep/%.d,$(SRCS))
-
-DESTDIR ?=
-PREFIX ?= /usr/local
 
 ifneq ($(PKGS),)
 CFLAGS += $(shell $(PKG_CONFIG) --cflags $(PKGS))
@@ -49,19 +50,17 @@ CXXFLAGS += $(shell $(PKG_CONFIG) --cflags $(PKGS))
 LDFLAGS += $(shell $(PKG_CONFIG) --libs $(PKGS))
 endif
 
-all: $(BUILD)/$(TARGET).so $(BUILD)/$(TARGET).a
-
 $(BUILD)/$(TARGET).so:  $(OBJS) $(EXTRADEPS)
 	@mkdir -p $(@D)
 	$(CC) -o $@ $(OBJS) -shared $(LDLAGS)
 	touch $(BUILD)/.built
 	@echo Created $@.
-
 $(BUILD)/$(TARGET).a:  $(OBJS) $(EXTRADEPS)
 	@mkdir -p $(@D)
 	$(AR) crs $@ $(OBJS)
 	touch $(BUILD)/.built
 	@echo Created $@.
+
 
 
 $(BUILD)/obj/%.c.o: src/%.c $(EXTRAPUBLICDEPS)
@@ -74,7 +73,6 @@ $(BUILD)/obj/%.cc.o: src/%.cc $(EXTRAPUBLICDEPS)
 
 $(BUILD)/dep/%.c.d: src/%.c $(HDRS)
 	@mkdir -p $(@D)
-	# DEP
 	$(CC) -o $@ -MM $< -MT $(patsubst src/%,$(BUILD)/obj/%.o,$<) $(CFLAGS)
 $(BUILD)/dep/%.cc.d: src/%.cc $(HDRS)
 	@mkdir -p $(@D)
