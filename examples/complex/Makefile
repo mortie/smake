@@ -2,8 +2,8 @@
 
 SRCS = src/main.c
 HDRS = 
-OBJS += $(patsubst src/%,$(BUILD)/obj/%.o,$(SRCS))
-DEPS += $(patsubst src/%,$(BUILD)/dep/%.d,$(SRCS))
+OBJS = $(patsubst src/%,$(BUILD)/obj/%.o,$(SRCS))
+DEPS = $(patsubst src/%,$(BUILD)/dep/%.d,$(SRCS))
 PUBLICHDRS = 
 
 # Defaults

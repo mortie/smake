@@ -2,8 +2,8 @@
 
 SRCS = src/add.c
 HDRS = include/adder/add.h
-OBJS += $(patsubst src/%,$(BUILD)/obj/%.o,$(SRCS))
-DEPS += $(patsubst src/%,$(BUILD)/dep/%.d,$(SRCS))
+OBJS = $(patsubst src/%,$(BUILD)/obj/%.o,$(SRCS))
+DEPS = $(patsubst src/%,$(BUILD)/dep/%.d,$(SRCS))
 PUBLICHDRS = include/adder/add.h
 
 # Defaults
