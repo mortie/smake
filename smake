@@ -59,7 +59,17 @@ isexec() {
 }
 
 trim() {
-	printf "%s" "$1" | tr '\n' ' ' | sed 's/^\s*//m'
+	skipping=1
+	printf "%s\n" "$1" | while IFS='' read -r line; do
+		if [ "$skipping" = 1 ]; then
+			trimmed="$(printf "%s" "$line" | sed 's/^\s*//')"
+			if [ -z "$trimmed" ]; then continue; fi
+			printf "%s\n" "$trimmed"
+			skipping=0
+		else
+			printf "%s\n" "$line"
+		fi
+	done
 }
 
 # A somewhat ugly way to get a variable from the Smakefile,
@@ -110,13 +120,15 @@ mk_smakedep_cleans=""
 mk_smakedep_distcleans=""
 mk_extradeps=""
 mk_extrapublicdeps=""
+mk_ccopts="-Iinclude"
+mk_ldopts=""
+mk_target=""
+mk_all_goals=""
 
 # Flags
-ccopts="-Iinclude"
-ldopts=""
 deptargets=""
 if islib "$projtype"; then
-	ccopts="$ccopts -fPIC"
+	mk_ccopts="$mk_ccopts -fPIC"
 fi
 
 # Find dependencies
@@ -141,54 +153,43 @@ $dep/build/\$(CONFIG)/.built: $depdeps
 	\$(MAKE) -C $dep distclean"
 
 	if islib "$deptype"; then
-		ccopts="$ccopts -isystem $dep/include"
-		ldopts="$ldopts -L$dep/build/\$(CONFIG)"
+		mk_ccopts="$mk_ccopts -isystem $dep/include"
+		mk_ldopts="$mk_ldopts -L$dep/build/\$(CONFIG)"
 	fi
 done
 
-mk_target_exe() {
-echo "\
-\$(BUILD)/\$(TARGET): $(trim "$mk_smakedep_goals") \$(OBJS) \$(EXTRADEPS)
+# $(TARGET) for exe
+if [ "$projtype" = exe ]; then
+	mk_all_goals="$mk_all_goals \$(BUILD)/\$(TARGET)"
+	mk_target="$mk_target
+\$(BUILD)/\$(TARGET): $(trim "$mk_smakedep_goals") \$(OBJS)
 	@mkdir -p \$(@D)
 	\$(CC) -o \$@ \$(OBJS) \$(LDFLAGS)
 	touch \$(BUILD)/.built
 	@echo Created \$@."
-}
+fi
 
-mk_target_solib() {
-echo "\
+# $(TARGET) for solib
+if [ "$projtype" = solib ] || [ "$projtype" = lib ]; then
+	mk_all_goals="$mk_all_goals \$(BUILD)/\$(TARGET).so"
+	mk_target="$mk_target
 \$(BUILD)/\$(TARGET).so: $(trim "$mk_smakedep_goals") \$(OBJS) \$(EXTRADEPS)
 	@mkdir -p \$(@D)
 	\$(CC) -o \$@ \$(OBJS) -shared \$(LDLAGS)
 	touch \$(BUILD)/.built
 	@echo Created \$@."
-}
+fi
 
-mk_target_alib() {
-echo "\
+# $(TARGET) for alib
+if [ "$projtype" = alib ] || [ "$projtype" = lib ]; then
+	mk_all_goals="$mk_all_goals \$(BUILD)/\$(TARGET).so"
+	mk_target="$mk_target
 \$(BUILD)/\$(TARGET).a: $(trim "$mk_smakedep_goals") \$(OBJS) \$(EXTRADEPS)
 	@mkdir -p \$(@D)
 	\$(AR) crs \$@ \$(OBJS)
 	touch \$(BUILD)/.built
 	@echo Created \$@."
-}
-
-mk_target_lib() {
-	echo "all: \$(BUILD)/\$(TARGET).so \$(BUILD)/\$(TARGET).a"
-	echo
-	mk_target_solib
-	echo
-	mk_target_alib
-}
-
-mk_target() {
-	case "$projtype" in
-		exe) mk_target_exe;;
-		solib) mk_target_solib;;
-		alib) mk_target_alib;;
-		lib) mk_target_lib;;
-	esac
-}
+fi
 
 mk_installation_exe() {
 echo "\
@@ -264,6 +265,8 @@ echo "\
 
 SRCS = $mk_srcs
 HDRS = $mk_hdrs
+OBJS += \$(patsubst src/%,\$(BUILD)/obj/%.o,\$(SRCS))
+DEPS += \$(patsubst src/%,\$(BUILD)/dep/%.d,\$(SRCS))
 PUBLICHDRS = $mk_publichdrs
 
 # Defaults
@@ -278,20 +281,25 @@ BUILDDIR ?= build
 BUILD ?= \$(BUILDDIR)/\$(CONFIG)
 WARNINGS = -Wall -Wextra -Wno-unused-parameter
 SMAKEFILE ?= Smakefile
+DESTDIR ?=
+PREFIX ?= /usr/local
 PHONIES = dumpdeps dumppublicdeps dumpprojtype clean distclean
 
 PKG_CONFIG ?= pkg-config
 AR ?= ar
 
-CCOPTS = $(trim "$ccopts")
+CCOPTS = $(trim "$mk_ccopts")
 CCOPTS_release = -O2 -flto
 CCOPTS_debug = -g
 CCOPTS_sanitize = -fsanitize=address -fsanitize=undefined \$(CCOPTS_debug)
 
-LDOPTS = $(trim "$ldopts")
+LDOPTS = $(trim "$mk_ldopts")
 LDOPTS_release = -flto
 LDOPTS_debug =
 LDOPTS_sanitize = -fsanitize=address -fsanitize=undefined \$(LDOPTS_debug)
+
+.PHONY: all
+all: $(trim "$mk_all_goals")
 
 -include \$(SMAKEFILE)
 
@@ -299,20 +307,15 @@ CFLAGS += \$(CCOPTS_\$(CONFIG)) \$(CCOPTS) \$(WARNINGS)
 CXXFLAGS += \$(CCOPTS_\$(CONFIG)) \$(CCOPTS) \$(WARNINGS)
 LDFLAGS += \$(LDOPTS_\$(CONFIG)) \$(LDOPTS)
 
-OBJS = \$(patsubst src/%,\$(BUILD)/obj/%.o,\$(SRCS))
-DEPS = \$(patsubst src/%,\$(BUILD)/dep/%.d,\$(SRCS))
-
-DESTDIR ?=
-PREFIX ?= /usr/local
-
 ifneq (\$(PKGS),)
 CFLAGS += \$(shell \$(PKG_CONFIG) --cflags \$(PKGS))
 CXXFLAGS += \$(shell \$(PKG_CONFIG) --cflags \$(PKGS))
 LDFLAGS += \$(shell \$(PKG_CONFIG) --libs \$(PKGS))
 endif
 
-$(mk_target)
-$mk_smakedep_targets
+$(trim "$mk_target")
+
+$(trim "$mk_smakedep_targets")
 
 \$(BUILD)/obj/%.c.o: src/%.c \$(EXTRAPUBLICDEPS)
 	@mkdir -p \$(@D)
@@ -320,6 +323,7 @@ $mk_smakedep_targets
 \$(BUILD)/obj/%.cc.o: src/%.cc \$(EXTRAPUBLICDEPS)
 	@mkdir -p \$(@D)
 	\$(CXX) -o \$@ -c \$< \$(CXXFLAGS)
+	\$(CC) -o \$@ -c \$< \$(CFLAGS)
 
 \$(BUILD)/dep/%.c.d: src/%.c \$(HDRS)
 	@mkdir -p \$(@D)

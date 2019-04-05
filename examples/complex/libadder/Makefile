@@ -70,9 +70,11 @@ $(BUILD)/obj/%.c.o: src/%.c $(EXTRAPUBLICDEPS)
 $(BUILD)/obj/%.cc.o: src/%.cc $(EXTRAPUBLICDEPS)
 	@mkdir -p $(@D)
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
+	$(CC) -o $@ -c $< $(CFLAGS)
 
 $(BUILD)/dep/%.c.d: src/%.c $(HDRS)
 	@mkdir -p $(@D)
+	# DEP
 	$(CC) -o $@ -MM $< -MT $(patsubst src/%,$(BUILD)/obj/%.o,$<) $(CFLAGS)
 $(BUILD)/dep/%.cc.d: src/%.cc $(HDRS)
 	@mkdir -p $(@D)
