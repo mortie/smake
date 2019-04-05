@@ -35,6 +35,8 @@ LDOPTS_release = -flto
 LDOPTS_debug =
 LDOPTS_sanitize = -fsanitize=address -fsanitize=undefined $(LDOPTS_debug)
 
+runpfx = @echo $(1) $(2) && $(2)
+
 .PHONY: all
 all: $(BUILD)/$(TARGET)
 
@@ -52,27 +54,26 @@ endif
 
 $(BUILD)/$(TARGET): libadder/build/$(CONFIG)/.built $(OBJS)
 	@mkdir -p $(@D)
-	$(CC) -o $@ $(OBJS) $(LDFLAGS)
+	$(call runpfx,'(LD)',$(CC) -o $@ $(OBJS) $(LDFLAGS))
 	touch $(BUILD)/.built
 	@echo Created $@.
 
 libadder/build/$(CONFIG)/.built: libadder/src/add.c libadder/include/adder/add.h
-	$(MAKE) -C libadder
+	$(call runpfx,'(SUB)',$(MAKE) -C libadder)
 
 $(BUILD)/obj/%.c.o: src/%.c $(EXTRAPUBLICDEPS)
 	@mkdir -p $(@D)
-	$(CC) -o $@ -c $< $(CFLAGS)
+	$(call runpfx,'(CC)',$(CC) -o $@ -c $< $(CFLAGS))
 $(BUILD)/obj/%.cc.o: src/%.cc $(EXTRAPUBLICDEPS)
 	@mkdir -p $(@D)
-	$(CXX) -o $@ -c $< $(CXXFLAGS)
-	$(CC) -o $@ -c $< $(CFLAGS)
+	$(call runpfx,'(CXX)',$(CXX) -o $@ -c $< $(CXXFLAGS))
 
 $(BUILD)/dep/%.c.d: src/%.c $(HDRS)
 	@mkdir -p $(@D)
-	$(CC) -o $@ -MM $< -MT $(patsubst src/%,$(BUILD)/obj/%.o,$<) $(CFLAGS)
+	$(call runpfx,'(DEP)',$(CC) -o $@ -MM $< -MT $(patsubst src/%,$(BUILD)/obj/%.o,$<) $(CFLAGS))
 $(BUILD)/dep/%.cc.d: src/%.cc $(HDRS)
 	@mkdir -p $(@D)
-	$(CXX) -o $@ -MM $< -MT $(patsubst src/%,$(BUILD)/obj/%.o,$<) $(CXXFLAGS)
+	$(call runpfx,'(DEP)',$(CXX) -o $@ -MM $< -MT $(patsubst src/%,$(BUILD)/obj/%.o,$<) $(CXXFLAGS))
 
 .PHONY: install
 install: $(BUILD)/$(TARGET)
