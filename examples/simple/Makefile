@@ -61,8 +61,6 @@ $(TARGET): $(BUILD)/$(TARGET)
 	cp $< $@
 	@echo Created $@.
 
-
-
 $(BUILD)/obj/%.c.o: src/%.c $(EXTRAPUBLICDEPS)
 	@mkdir -p $(@D)
 	$(call runpfx,'(CC)',$(CC) -o $@ -c $< $(CFLAGS))

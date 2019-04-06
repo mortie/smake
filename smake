@@ -98,8 +98,8 @@ fi
 
 # Find all the source code
 if [ -d src ]; then
-	sources="$(find src -name '*.c' -or -name '*.cc')"
-	headers="$(find src -name '*.h')"
+	sources="$(find src -name '*.c' -or -name '*.cc' | sort)"
+	headers="$(find src -name '*.h' | sort)"
 fi
 if [ -d include ]; then
 	publicheaders="$(find include -name '*.h')"

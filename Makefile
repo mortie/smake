@@ -7,8 +7,8 @@ check:
 
 .PHONY: install
 install: smake
-	mkdir -p $(DESTDIR)$(PREFIX)/bin
-	cp -f $^ $(DESTDIR)$(PREFIX)/bin
+	install -d $(DESTDIR)$(PREFIX)/bin
+	install -m 0755 $^ $(DESTDIR)$(PREFIX)/bin
 
 .PHONY: uninstall
 uninstall:
