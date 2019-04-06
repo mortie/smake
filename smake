@@ -80,7 +80,7 @@ all: dumpvars
 dumpvars:
 	@echo \$(TARGET)
 	@echo \$(PROJTYPE)
-	@echo \$(SMAKEDEPS)" \
+	@echo \$(DEPENDS)" \
 	| $make -f - dumpvars)"
 
 # Get some variables from the Smakefile

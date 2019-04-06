@@ -1,2 +1,2 @@
 LDOPTS += -static -ladder
-SMAKEDEPS = libadder
+DEPENDS = libadder
