@@ -50,6 +50,7 @@ else
 	echo "Neither 'gmake' nor 'make' was found. Either install make or set \$MAKE." >&2
 	exit 1
 fi
+make="$make --no-print-directory"
 
 islib() {
 	[ "$1" = solib ] || [ "$1" = alib ] || [ "$1" = lib ]
@@ -58,7 +59,7 @@ islib() {
 trimpipe() {
 	while read -r line; do
 		if [ "$line" != "" ]; then
-			printf "%s\n" "$line"
+			printf "%s\\n" "$line"
 			break
 		fi
 	done
@@ -67,7 +68,7 @@ trimpipe() {
 }
 
 trim() {
-	printf "%s\n" "$1" | trimpipe
+	printf "%s\\n" "$1" | trimpipe
 }
 
 # Dump some information
@@ -135,9 +136,9 @@ fi
 for dep in $smakedeps; do
 	$smakecmd -C "$dep" -g
 
-	depdeps="$($make --no-print-directory -C "$dep" PREPEND="$dep/" dumpdeps)"
-	deppublicdeps="$($make --no-print-directory -C "$dep" PREPEND="$dep/" dumppublicdeps)"
-	deptype="$($make --no-print-directory -C "$dep" dumpprojtype)"
+	depdeps="$($make -C "$dep" PREPEND="$dep/" dumpdeps)"
+	deppublicdeps="$($make -C "$dep" PREPEND="$dep/" dumppublicdeps)"
+	deptype="$($make -C "$dep" dumpprojtype)"
 	mk_extradeps="$mk_extradeps $depdeps"
 	mk_extrapublicdeps="$mk_extrapublicdeps $deppublicdeps"
 	mk_smakedep_goals="$mk_smakedep_targets $dep/build/\$(CONFIG)/.built"

@@ -4,6 +4,10 @@ PREFIX ?= /usr/local
 .PHONY: check
 check:
 	shellcheck smake
+	./smake -C examples/simple clean
+	./smake -C examples/simple
+	./smake -C examples/complex clean
+	./smake -C examples/complex
 
 .PHONY: install
 install: smake
