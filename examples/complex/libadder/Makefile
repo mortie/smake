@@ -8,8 +8,8 @@ PUBLICHDRS = include/adder/add.h
 
 # Defaults
 PKGS =
-TARGET = libadder
 VERSION = unknown
+PROJNAME = libadder
 PROJTYPE = lib
 EXTRADEPS = 
 EXTRAPUBLICDEPS = 
@@ -38,7 +38,7 @@ LDOPTS_sanitize = -fsanitize=address -fsanitize=undefined $(LDOPTS_debug)
 runpfx = @echo $(1) $(2) && $(2)
 
 .PHONY: all
-all: $(BUILD)/$(TARGET).so $(BUILD)/$(TARGET).a
+all: $(BUILD)/$(PROJNAME).so $(BUILD)/$(PROJNAME).a
 
 -include $(SMAKEFILE)
 
@@ -52,16 +52,18 @@ CXXFLAGS += $(shell $(PKG_CONFIG) --cflags $(PKGS))
 LDFLAGS += $(shell $(PKG_CONFIG) --libs $(PKGS))
 endif
 
-$(BUILD)/$(TARGET).so:  $(OBJS) $(EXTRADEPS)
+$(BUILD)/$(PROJNAME).so:  $(OBJS) $(EXTRADEPS)
 	@mkdir -p $(@D)
 	$(call runpfx,'(LD)',$(CC) -o $@ $(OBJS) -shared $(LDLAGS))
 	touch $(BUILD)/.built
-	@echo Created $@.
-$(BUILD)/$(TARGET).a:  $(OBJS) $(EXTRADEPS)
+	@echo '(OK)' Created $@.
+$(BUILD)/$(PROJNAME).a:  $(OBJS) $(EXTRADEPS)
 	@mkdir -p $(@D)
 	$(AR) crs $@ $(OBJS)
 	touch $(BUILD)/.built
-	@echo Created $@.
+	@echo '(OK)' Created $@.
+
+
 
 $(BUILD)/obj/%.c.o: src/%.c $(EXTRAPUBLICDEPS)
 	@mkdir -p $(@D)
@@ -78,7 +80,7 @@ $(BUILD)/dep/%.cc.d: src/%.cc $(HDRS)
 	$(call runpfx,'(DEP)',$(CXX) -o $@ -MM $< -MT $(patsubst src/%,$(BUILD)/obj/%.o,$<) $(CXXFLAGS))
 
 .PHONY: install
-install: $(BUILD)/$(TARGET).so $(BUILD)$(TARGET).a
+install: $(BUILD)/$(PROJNAME).so $(BUILD)$(PROJNAME).a
 	mkdir -p $(DESTDIR)$(PREFIX)/lib
 	cp -f $^ $(DESTDIR)$(PREFIX)/lib
 	mkdir -p $(DESTDIR)$(PREFIX)/include
@@ -86,13 +88,13 @@ install: $(BUILD)/$(TARGET).so $(BUILD)$(TARGET).a
 
 .PHONY: uninstall
 uninstall:
-	rm -f $(DESTDIR)$(PREFIX)/lib/$(TARGET).so
-	rm -f $(DESTDIR)$(PREFIX)/lib/$(TARGET).a
+	rm -f $(DESTDIR)$(PREFIX)/lib/$(PROJNAME).so
+	rm -f $(DESTDIR)$(PREFIX)/lib/$(PROJNAME).a
 	rm -rf $(patsubst include/%,$(DESTDIR)$(PREFIX)/include/%,$(wildcard include/*))
 
 .PHONY: clean
 clean:
-	rm -rf $(TARGET) $(BUILD)
+	rm -rf $(PROJNAME) $(BUILD)
 
 .PHONY: distclean
 distclean:

@@ -1,2 +1,3 @@
+PROJNAME = complex
 LDOPTS += -static -ladder
 DEPENDS = libadder

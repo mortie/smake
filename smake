@@ -78,18 +78,25 @@ all: dumpvars
 -include $opt_file
 .PHONY: dumpvars
 dumpvars:
-	@echo \$(TARGET)
+	@echo \$(PROJNAME)
 	@echo \$(PROJTYPE)
 	@echo \$(DEPENDS)" \
 	| $make -f - dumpvars)"
 
-# Get some variables from the Smakefile
-target="$(echo "$dumps" | head -n 1)"
-if [ -z "$target" ]; then target="$(basename "$(readlink -f .)")"; fi
+# Get project name from Smakefile
+projname="$(echo "$dumps" | head -n 1)"
+if [ -z "$projname" ]; then
+	projname="$(basename "$(readlink -f .)")"
+	echo "Warning: No 'PROJNAME' specified. Defaulting to the directory name ($projname)." >&2
+fi
 dumps="$(echo "$dumps" | tail -n +2)"
+
+# Get project type
 projtype="$(echo "$dumps" | head -n 1)"
 if [ -z "$projtype" ]; then projtype=exe; fi
 dumps="$(echo "$dumps" | tail -n +2)"
+
+# Get dependencies
 smakedeps="$(echo "$dumps" | head -n 1)"
 
 if ! echo " exe solib alib lib " | grep " $projtype " >/dev/null; then
@@ -114,7 +121,6 @@ mk_publichdrs="$(printf "%s" "$publicheaders" | tr '\n' ' ')"
 # Generated make
 mk_smakedep_targets=""
 mk_smakedep_goals=""
-mk_smakedep_targets=""
 mk_smakedep_installs=""
 mk_smakedep_uninstalls=""
 mk_smakedep_cleans=""
@@ -165,76 +171,76 @@ $dep/build/\$(CONFIG)/.built: $depdeps
 	fi
 done
 
-# $(TARGET) for exe
+# $(PROJNAME) for exe
 if [ "$projtype" = exe ]; then
-	mk_all_goals="$mk_all_goals \$(BUILD)/\$(TARGET)"
+	mk_all_goals="$mk_all_goals \$(BUILD)/\$(PROJNAME)"
 	mk_target="$mk_target
-\$(BUILD)/\$(TARGET): $(trim "$mk_smakedep_goals") \$(OBJS)
+\$(BUILD)/\$(PROJNAME): $(trim "$mk_smakedep_goals") \$(OBJS)
 	@mkdir -p \$(@D)
 	\$(call runpfx,'(LD)',\$(CC) -o \$@ \$(OBJS) \$(LDFLAGS))
 	touch \$(BUILD)/.built
-	@echo Created \$@.
-\$(TARGET): \$(BUILD)/\$(TARGET)
+	@echo '(OK)' Created \$@.
+\$(PROJNAME): \$(BUILD)/\$(PROJNAME)
 	cp \$< \$@
-	@echo Created \$@."
+	@echo '(OK)' Created \$@."
 fi
 
-# $(TARGET) for solib
+# $(PROJNAME) for solib
 if [ "$projtype" = solib ] || [ "$projtype" = lib ]; then
-	mk_all_goals="$mk_all_goals \$(BUILD)/\$(TARGET).so"
+	mk_all_goals="$mk_all_goals \$(BUILD)/\$(PROJNAME).so"
 	mk_target="$mk_target
-\$(BUILD)/\$(TARGET).so: $(trim "$mk_smakedep_goals") \$(OBJS) \$(EXTRADEPS)
+\$(BUILD)/\$(PROJNAME).so: $(trim "$mk_smakedep_goals") \$(OBJS) \$(EXTRADEPS)
 	@mkdir -p \$(@D)
 	\$(call runpfx,'(LD)',\$(CC) -o \$@ \$(OBJS) -shared \$(LDLAGS))
 	touch \$(BUILD)/.built
-	@echo Created \$@."
+	@echo '(OK)' Created \$@."
 fi
 
-# $(TARGET) for alib
+# $(PROJNAME) for alib
 if [ "$projtype" = alib ] || [ "$projtype" = lib ]; then
-	mk_all_goals="$mk_all_goals \$(BUILD)/\$(TARGET).a"
+	mk_all_goals="$mk_all_goals \$(BUILD)/\$(PROJNAME).a"
 	mk_target="$mk_target
-\$(BUILD)/\$(TARGET).a: $(trim "$mk_smakedep_goals") \$(OBJS) \$(EXTRADEPS)
+\$(BUILD)/\$(PROJNAME).a: $(trim "$mk_smakedep_goals") \$(OBJS) \$(EXTRADEPS)
 	@mkdir -p \$(@D)
 	\$(AR) crs \$@ \$(OBJS)
 	touch \$(BUILD)/.built
-	@echo Created \$@."
+	@echo '(OK)' Created \$@."
 fi
 
 # install/uninstall for exe
 if [ "$projtype" = exe ]; then
 	mk_installation="$mk_installation
 .PHONY: install
-install: \$(BUILD)/\$(TARGET)
+install: \$(BUILD)/\$(PROJNAME)
 	mkdir -p \$(DESTDIR)\$(PREFIX)/bin
 	cp -f \$^ \$(DESTDIR)\$(PREFIX)/bin
-	chmod 755 \$(DESTDIR)\$(PREFIX)/bin/\$(TARGET)$mk_smakedep_installs
+	chmod 755 \$(DESTDIR)\$(PREFIX)/bin/\$(PROJNAME)$mk_smakedep_installs
 
 .PHONY: uninstall
 uninstall:
-	rm -f \$(DESTDIR)\$(PREFIX)/bin/\$(TARGET)$mk_smakedep_uninstalls"
+	rm -f \$(DESTDIR)\$(PREFIX)/bin/\$(PROJNAME)$mk_smakedep_uninstalls"
 
 # install/uninstall for solib
 elif [ "$projtype" = solib ]; then
 	mk_installation="
 .PHONY: install
-install: \$(BUILD)/\$(TARGET).so
+install: \$(BUILD)/\$(PROJNAME).so
 	mkdir -p \$(DESTDIR)\$(PREFIX)/lib
 	cp -f \$^ \$(DESTDIR)\$(PREFIX)/lib
-	chmod 755 \$(DESTDIR)\$(PREFIX)/lib/\$(TARGET).so
+	chmod 755 \$(DESTDIR)\$(PREFIX)/lib/\$(PROJNAME).so
 	mkdir -p \$(DESTDIR)\$(PREFIX)/include
 	cp -rf include/* \$(DESTDIR)\$(PREFIX)/include$mk_smakedep_installs
 
 .PHONY: uninstall
 uninstall:
-	rm -f \$(DESTDIR)\$(PREFIX)/lib/\$(TARGET).so
+	rm -f \$(DESTDIR)\$(PREFIX)/lib/\$(PROJNAME).so
 	rm -rf \$(patsubst include/%,\$(DESTDIR)\$(PREFIX)/include/%,\$(wildcard include/*))$mk_smakedep_uninstalls"
 
 # install/uninstall for alib
 elif [ "$projtype" = alib ]; then
 	mk_installation="
 .PHONY: install
-install: \$(BUILD)/\$(TARGET).a
+install: \$(BUILD)/\$(PROJNAME).a
 	mkdir -p \$(DESTDIR)\$(PREFIX)/lib
 	cp -f \$^ \$(DESTDIR)\$(PREFIX)/lib
 	mkdir -p \$(DESTDIR)\$(PREFIX)/include
@@ -242,14 +248,14 @@ install: \$(BUILD)/\$(TARGET).a
 
 .PHONY: uninstall
 uninstall:
-	rm -f \$(DESTDIR)\$(PREFIX)/lib/\$(TARGET).a
+	rm -f \$(DESTDIR)\$(PREFIX)/lib/\$(PROJNAME).a
 	rm -rf \$(patsubst include/%,\$(DESTDIR)\$(PREFIX)/include/%,\$(wildcard include/*))$mk_smakedep_uninstalls"
 
 # install/uninstall for lib
 elif [ "$projtype" = lib ]; then
 	mk_installation="
 .PHONY: install
-install: \$(BUILD)/\$(TARGET).so \$(BUILD)\$(TARGET).a
+install: \$(BUILD)/\$(PROJNAME).so \$(BUILD)\$(PROJNAME).a
 	mkdir -p \$(DESTDIR)\$(PREFIX)/lib
 	cp -f \$^ \$(DESTDIR)\$(PREFIX)/lib
 	mkdir -p \$(DESTDIR)\$(PREFIX)/include
@@ -257,8 +263,8 @@ install: \$(BUILD)/\$(TARGET).so \$(BUILD)\$(TARGET).a
 
 .PHONY: uninstall
 uninstall:
-	rm -f \$(DESTDIR)\$(PREFIX)/lib/\$(TARGET).so
-	rm -f \$(DESTDIR)\$(PREFIX)/lib/\$(TARGET).a
+	rm -f \$(DESTDIR)\$(PREFIX)/lib/\$(PROJNAME).so
+	rm -f \$(DESTDIR)\$(PREFIX)/lib/\$(PROJNAME).a
 	rm -rf \$(patsubst include/%,\$(DESTDIR)\$(PREFIX)/include/%,\$(wildcard include/*))$mk_smakedep_uninstalls"
 fi
 
@@ -273,8 +279,8 @@ PUBLICHDRS = $mk_publichdrs
 
 # Defaults
 PKGS =
-TARGET = $target
 VERSION = $(git describe 2>/dev/null || echo unknown)
+PROJNAME = $projname
 PROJTYPE = $projtype
 EXTRADEPS = $(trim "$mk_extradeps")
 EXTRAPUBLICDEPS = $(trim "$mk_extrapublicdeps")
@@ -339,7 +345,7 @@ $(trim "$mk_installation")
 
 .PHONY: clean
 clean:
-	rm -rf \$(TARGET) \$(BUILD)$mk_smakedep_cleans
+	rm -rf \$(PROJNAME) \$(BUILD)$mk_smakedep_cleans
 
 .PHONY: distclean
 distclean:
