@@ -43,15 +43,14 @@ all: $(BUILD)/$(PROJNAME)
 
 -include $(SMAKEFILE)
 
-CFLAGS += $(CCOPTS_$(CONFIG)) $(CCOPTS) $(WARNINGS)
-CXXFLAGS += $(CCOPTS_$(CONFIG)) $(CCOPTS) $(WARNINGS)
-LDFLAGS += $(LDOPTS_$(CONFIG)) $(LDOPTS)
-
 ifneq ($(PKGS),)
-CFLAGS += $(shell $(PKG_CONFIG) --cflags $(PKGS))
-CXXFLAGS += $(shell $(PKG_CONFIG) --cflags $(PKGS))
-LDFLAGS += $(shell $(PKG_CONFIG) --libs $(PKGS))
+CCOPTS += $(shell $(PKG_CONFIG) --cflags $(PKGS))
+LDOPTS += $(shell $(PKG_CONFIG) --libs $(PKGS))
 endif
+
+CFLAGS := $(CCOPTS_$(CONFIG)) $(CCOPTS) $(WARNINGS) $(CFLAGS)
+CXXFLAGS := $(CCOPTS_$(CONFIG)) $(CCOPTS) $(WARNINGS) $(CXXFLAGS)
+LDFLAGS := $(LDOPTS_$(CONFIG)) $(LDOPTS) $(LDFLAGS)
 
 $(BUILD)/$(PROJNAME):  $(OBJS)
 	@mkdir -p $(@D)
