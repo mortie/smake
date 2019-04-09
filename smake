@@ -282,7 +282,6 @@ PUBLICHDRS = $mk_publichdrs
 
 # Defaults
 PKGS =
-VERSION = $(git describe 2>/dev/null || echo unknown)
 EXTRADEPS = $(trim "$mk_extradeps")
 EXTRAPUBLICDEPS = $(trim "$mk_extrapublicdeps")
 CONFIG ?= release

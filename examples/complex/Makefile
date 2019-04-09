@@ -11,7 +11,6 @@ PUBLICHDRS =
 
 # Defaults
 PKGS =
-VERSION = unknown
 EXTRADEPS = libadder/src/add.c libadder/include/adder/add.h
 EXTRAPUBLICDEPS = libadder/include/adder/add.h
 CONFIG ?= release

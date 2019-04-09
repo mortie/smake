@@ -11,7 +11,6 @@ PUBLICHDRS = include/adder/add.h
 
 # Defaults
 PKGS =
-VERSION = unknown
 EXTRADEPS = 
 EXTRAPUBLICDEPS = 
 CONFIG ?= release

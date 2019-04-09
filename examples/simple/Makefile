@@ -11,7 +11,6 @@ PUBLICHDRS =
 
 # Defaults
 PKGS =
-VERSION = unknown
 EXTRADEPS = 
 EXTRAPUBLICDEPS = 
 CONFIG ?= release
