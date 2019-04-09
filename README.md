@@ -26,7 +26,7 @@ goals.
 Just put the `smake` script somewhere in your `PATH`.
 
 ``` shell
-curl 'https://raw.githubusercontent.com/mortie/smake/master/smake' | sudo tee /usr/local/bin/smake
+curl 'https://raw.githubusercontent.com/mortie/smake/master/smake' | sudo tee /usr/local/bin/smake && sudo chown +x /usr/local/bin/smake
 ```
 
 ## Usage
