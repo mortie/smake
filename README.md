@@ -1,6 +1,8 @@
 # smake
 
 `smake` is a simple Makefile generator which requires little to no configuration.
+I view it sort of as a version of make with a new, more modern set of implicit
+goals.
 
 <!-- toc -->
 
@@ -15,6 +17,7 @@
   * [`WARNINGS`](#warnings)
   * [`CONFIG`](#config)
   * [`CCOPTS`/`LDOPTS`](#ccoptsldopts)
+- [Build configurations](#build-configurations)
 
 <!-- tocstop -->
 
@@ -96,12 +99,6 @@ Default: `-Wall -Wextra -Wno-unused-parameter`
 The current build configuration. Treat this as a read-only property; it's meant
 to be set when running `smake`.
 
-By default, the available options are `release`, `debug` and `sanitize`, where
-`release` enables optimizations, `debug` enables debugging symbols, and
-`sanitize` enables debug symbols and asan/ubsan. Creating a new build option
-`myconfig` just means creating a new variable called `CCOPTS_myconfig` and/or
-`LDOPTS_myconfig`.
-
 Default: `release`
 
 ### `CCOPTS`/`LDOPTS`
@@ -112,3 +109,19 @@ CCOPTS defaults: `-Iinclude`, and `-isystem` flags for any dependencies you may
 have
 
 LDOPTS defaults: `-L` flags for any library dependencies you may have
+
+## Build configurations
+
+Smake introduces the concept of build configurations. To define a new build
+configuration, let's call it `myconfig`, set the variables `CCOPTS_myconfig`
+and `LDOPTS_myconfig`. `$(CCOPTS_$(CONFIG))` is included in the `CFLAGS`/`CXXFLAGS`
+variables, `$(LDOPTS_$(CONFIG))` is included in `LDFLAGS`, so when someone runs
+your project with `smake CONFIG=myconfig` (or `make CONFIG=myconfig`), your
+new build options will be used.
+
+Build configs are built into the directory `$(BUILDDIR)/$(CONFIG)` (that is,
+`build/$(CONFIG)`), so cleaning before building with a new config is generally
+not necessary.
+
+A build config for a testing build using [Snow](http://github.com/mortie/snow/)
+would for example generally just consist of `CCOPTS_testing = -DSNOW_ENABLED`.
