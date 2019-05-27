@@ -4,10 +4,10 @@ PROJNAME = complex
 PROJTYPE = exe
 
 SRCS = src/main.c
-HDRS = 
+HDRS =
 OBJS = $(patsubst src/%,$(BUILD)/obj/%.o,$(SRCS))
 DEPS = $(patsubst src/%,$(BUILD)/dep/%.d,$(SRCS))
-PUBLICHDRS = 
+PUBLICHDRS =
 
 # Defaults
 PKGS =
@@ -20,7 +20,7 @@ WARNINGS = -Wall -Wextra -Wno-unused-parameter
 SMAKEFILE ?= Smakefile
 DESTDIR ?=
 PREFIX ?= /usr/local
-PHONIES = dumpdeps dumppublicdeps dumpprojtype clean distclean
+PHONIES = dumpdeps dumppublicdeps dumpprojtype clean cleanall
 
 PKG_CONFIG ?= pkg-config
 AR ?= ar
@@ -94,10 +94,10 @@ clean:
 	rm -rf $(PROJNAME) $(BUILD)
 	$(MAKE) -C libadder clean
 
-.PHONY: distclean
-distclean:
+.PHONY: cleanall
+cleanall:
 	rm -rf $(BUILDDIR)
-	$(MAKE) -C libadder distclean
+	$(MAKE) -C libadder cleanall
 
 .PHONY: dumpdeps
 dumpdeps:

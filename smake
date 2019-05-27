@@ -99,8 +99,8 @@ dumps="$(echo "$dumps" | tail -n +2)"
 # Get dependencies
 smakedeps="$(echo "$dumps" | head -n 1)"
 
-if ! echo " exe solib alib lib " | grep " $projtype " >/dev/null; then
-	echo "Invalid PROJTYPE: $projtype. Expected exe, lib, alib or solib." >&2
+if ! echo " exe solib alib lib none " | grep " $projtype " >/dev/null; then
+	echo "Invalid PROJTYPE: $projtype. Expected exe, lib, alib, solib or none." >&2
 	exit 1
 fi
 
@@ -124,7 +124,7 @@ mk_smakedep_goals=""
 mk_smakedep_installs=""
 mk_smakedep_uninstalls=""
 mk_smakedep_cleans=""
-mk_smakedep_distcleans=""
+mk_smakedep_cleanalls=""
 mk_extradeps=""
 mk_extrapublicdeps=""
 mk_ccopts="-Iinclude"
@@ -162,8 +162,8 @@ $dep/build/\$(CONFIG)/.built: $depdeps
 	mk_smakedep_cleans="$mk_smakedep_cleans
 	\$(MAKE) -C $dep clean"
 
-	mk_smakedep_distcleans="$mk_smakedep_distcleans
-	\$(MAKE) -C $dep distclean"
+	mk_smakedep_cleanalls="$mk_smakedep_cleanalls
+	\$(MAKE) -C $dep cleanall"
 
 	if islib "$deptype"; then
 		mk_ccopts="$mk_ccopts -isystem $dep/include"
@@ -291,7 +291,7 @@ WARNINGS = -Wall -Wextra -Wno-unused-parameter
 SMAKEFILE ?= Smakefile
 DESTDIR ?=
 PREFIX ?= /usr/local
-PHONIES = dumpdeps dumppublicdeps dumpprojtype clean distclean
+PHONIES = dumpdeps dumppublicdeps dumpprojtype clean cleanall
 
 PKG_CONFIG ?= pkg-config
 AR ?= ar
@@ -346,9 +346,9 @@ $(trim "$mk_installation")
 clean:
 	rm -rf \$(PROJNAME) \$(BUILD)$mk_smakedep_cleans
 
-.PHONY: distclean
-distclean:
-	rm -rf \$(BUILDDIR)$mk_smakedep_distcleans
+.PHONY: cleanall
+cleanall:
+	rm -rf \$(BUILDDIR)$mk_smakedep_cleanalls
 
 .PHONY: dumpdeps
 dumpdeps:
@@ -364,7 +364,7 @@ dumpprojtype:
 
 ifeq (\$(filter \$(PHONIES),\$(MAKECMDGOALS)),)
 -include \$(DEPS)
-endif" > "$opt_output"
+endif" | sed 's/\s\+$//' > "$opt_output"
 
 if [ "$opt_generate_only" = 0 ]; then
 	$make SMAKEFILE="$opt_file" -j "$opt_jobs" -f "$opt_output" "$@"
