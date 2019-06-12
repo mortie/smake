@@ -113,7 +113,8 @@ LDOPTS defaults: `-L` flags for any library dependencies you may have
 ## Build configurations
 
 Smake introduces the concept of build configurations. To define a new build
-configuration, let's call it `myconfig`, set the variables `CCOPTS_myconfig`
+configuration, let's call it `myconfig`, append it to the `CONFIGS` variable
+with `CONFIGS += myconfig`, and set the variables `CCOPTS_myconfig`
 and `LDOPTS_myconfig`. `$(CCOPTS_$(CONFIG))` is included in the `CFLAGS`/`CXXFLAGS`
 variables, `$(LDOPTS_$(CONFIG))` is included in `LDFLAGS`, so when someone runs
 your project with `smake CONFIG=myconfig` (or `make CONFIG=myconfig`), your
