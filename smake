@@ -315,7 +315,9 @@ all: $(trim "$mk_all_goals")
 -include \$(SMAKEFILE)
 
 ifeq (\$(filter \$(CONFIGS),\$(CONFIG)),)
+ifeq (\$(filter cleanall,\$(MAKECMDGOALS)),)
 \$(error Unknown config '\$(CONFIG)'. Supported configs: \$(CONFIGS))
+endif
 endif
 
 ifneq (\$(PKGS),)

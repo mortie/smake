@@ -44,7 +44,9 @@ all: $(BUILD)/$(PROJNAME)
 -include $(SMAKEFILE)
 
 ifeq ($(filter $(CONFIGS),$(CONFIG)),)
+ifeq ($(filter cleanall,$(MAKECMDGOALS)),)
 $(error Unknown config '$(CONFIG)'. Supported configs: $(CONFIGS))
+endif
 endif
 
 ifneq ($(PKGS),)
